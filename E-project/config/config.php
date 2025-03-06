@@ -1,13 +1,13 @@
 <?php
-$host = 'localhost';
-$db = 'ecommerce';
-$user = 'root';
-$password = '';
+session_start();
+$host = "localhost";
+$user = "root";
+$password = "";
+$database = "onlinestore";
 
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$db", $user, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+$conn = new mysqli($host, $user, $password, $database);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>
