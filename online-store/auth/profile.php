@@ -1,17 +1,22 @@
 <?php
 session_start();
-if (!isset($_SESSION["user_id"])) {
-    header("Location: logout.php");
-    exit();
-}
 include("../config/db.php");
 
-$user_id = $_SESSION["user_id"];
-$stmt = $conn->prepare("SELECT name, email FROM users WHERE id = ?");
-$stmt->bind_param("i", $user_id);
+// If user is not logged in, redirect to login page
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Get user details from the database
+$stmt = $conn->prepare("SELECT name, email, created_at FROM users WHERE id = ?");
+$stmt->bind_param("i", $_SESSION["user_id"]);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
+
+// Automatically logout on page refresh
+session_destroy();
 ?>
 
 <!DOCTYPE html>
@@ -23,13 +28,26 @@ $user = $result->fetch_assoc();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
-<div class="container mt-5">
-    <div class="col-md-4 mx-auto">
-        <h3 class="text-center">Profile</h3>
-        <p><strong>Name:</strong> <?php echo htmlspecialchars($user['name']); ?></p>
-        <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
-        <a href="logout.php" class="btn btn-danger w-100">Logout</a>
+
+<?php include("navbar.php"); ?>
+
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header text-center bg-primary text-white">
+                    <h3>👤 User Profile</h3>
+                </div>
+                <div class="card-body text-center">
+                    <p><strong>Name:</strong> <?php echo $user["name"]; ?></p>
+                    <p><strong>Email:</strong> <?php echo $user["email"]; ?></p>
+                    <p><strong>Joined On:</strong> <?php echo date("F j, Y", strtotime($user["created_at"])); ?></p>
+                    <a href="logout.php" class="btn btn-danger">Logout</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
 </body>
 </html>
